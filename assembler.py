@@ -5,45 +5,47 @@ def assemble(instruction):
     if opcode == 'ADD':
         func7 = '0000000'
         regDest = format(int(parts[1][1:]), '05b')  
-        reg2 = format(int(parts[2][1:]), '05b')     
-        reg1 = format(int(parts[3][1:]), '05b')     
+        reg2 = format(int(parts[3][1:]), '05b')
+        reg1 = format(int(parts[2][1:]), '05b')     
         func3 = '000'
         opcode_bin = '0110011'
-        return f'{func7}{reg1}{reg2}{func3}{regDest}{opcode_bin}'
+        return f'{func7}{reg2}{reg1}{func3}{regDest}{opcode_bin}'
     
     elif opcode == 'SUB':
         func7 = '0100000'
-        regDest = format(int(parts[1][1:]), '05b')  
-        reg2 = format(int(parts[2][1:]), '05b')     
-        reg1 = format(int(parts[3][1:]), '05b')     
+        regDest = format(int(parts[1][1:]), '05b')
+        reg2 = format(int(parts[3][1:]), '05b')
+        reg1 = format(int(parts[2][1:]), '05b')
         func3 = '000'
         opcode_bin = '0110011'
-        return f'{func7}{reg1}{reg2}{func3}{regDest}{opcode_bin}'
+        return f'{func7}{reg2}{reg1}{func3}{regDest}{opcode_bin}'
     
     elif opcode == 'ADDi':
-        imediato = format(int(parts[2]), '012b')  
+        func7 = '00'
+        imediato = format(int(parts[2]), '010b')  
         reg = format(int(parts[1][1:]), '05b')
         func3 = '000'
         regDest = format(int(parts[3][1:]), '05b')
         opcode_bin = '0010011'
-        return f'{imediato}{reg}{func3}{regDest}{opcode_bin}'
+        return f'{func7}{imediato}{reg}{func3}{regDest}{opcode_bin}'
     
     elif opcode == 'SUBi':
-        imediato = format(int(parts[2]), '012b')  
+        func7 = '01'
+        imediato = format(int(parts[2]), '010b')  
         reg = format(int(parts[1][1:]), '05b')
         func3 = '000'
         regDest = format(int(parts[3][1:]), '05b')
         opcode_bin = '0010011'
-        return f'{imediato}{reg}{func3}{regDest}{opcode_bin}'
+        return f'{func7}{imediato}{reg}{func3}{regDest}{opcode_bin}'
     
     elif opcode == 'STORE':
-        imm_part1 = format(int(parts[3]), '07b')
         reg2 = format(int(parts[2][1:]), '05b')
         reg1 = format(int(parts[1][1:]), '05b')
         func3 = '000'
-        imm_part2 = format(int(parts[3]), '05b')
         opcode_bin = '0100011'
-        return f'{imm_part1}{reg1}{reg2}{func3}{imm_part2}{opcode_bin}'
+        endreg = '00000'
+        complemento = '0000000'
+        return f'{complemento}{reg2}{endreg}{func3}{reg1}{opcode_bin}'
     
     elif opcode == 'JMP':
         offset = format(int(parts[1]), '06b') # 6-bit offset
@@ -51,6 +53,37 @@ def assemble(instruction):
         zeros = '0' * 19  
         return f'{offset}{zeros}{opcode_bin}'
 
+    elif opcode == 'LOAD':
+        reg2 = format(int(parts[2][1:]), '05b')
+        reg1 = format(int(parts[1][1:]), '05b')
+        func3 = '000'
+        opcode_bin = '0000011'
+        endreg = '00000'
+        complemento = '0000000'
+        return f'{complemento}{reg2}{endreg}{func3}{reg1}{opcode_bin}'
+    
+    elif opcode == 'DIV2':
+        reg2 = format(int(parts[3][1:]), '05b')
+        reg1 = format(int(parts[2][1:]), '05b')
+        func3 = '001'
+        opcode_bin = '0110011'
+        endreg = format(int(parts[1][1:]), '05b')
+        complemento = '0000000'
+        return f'{complemento}{reg2}{reg1}{func3}{endreg}{opcode_bin}'
+    
+    elif opcode == 'MUL2':
+        reg2 = format(int(parts[3][1:]), '05b')
+        reg1 = format(int(parts[2][1:]), '05b')
+        func3 = '101'
+        opcode_bin = '0110011'
+        endreg = format(int(parts[1][1:]), '05b')
+        complemento = '0100000'
+        return f'{complemento}{reg2}{reg1}{func3}{endreg}{opcode_bin}'
+    
+    elif opcode == 'RESET':
+        zeros = 25*'0'
+        opcode_bin = '1010101'
+        return f'{zeros}{opcode_bin}'
     else:
         raise ValueError("Instrução desconhecida!")
 
