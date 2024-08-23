@@ -1,4 +1,10 @@
 def assemble(instruction):
+
+    def to_twos_complement(value, bits):
+        if value < 0:
+            value = (1 << bits) + value
+        return format(value, f'0{bits}b')
+
     parts = instruction.split()
     opcode = parts[0]
     
@@ -48,7 +54,7 @@ def assemble(instruction):
         return f'{zeros}{reg1}{endreg}{func3}{regDest}{opcode_bin}'
     
     elif opcode == 'JMP':
-        offset = format(int(parts[1]), '06b') # 6-bit offset
+        offset = to_twos_complement(int(parts[1]), 6)  # 6-bit offset
         opcode_bin = '1101111' 
         zeros = '0' * 19  
         return f'{offset}{zeros}{opcode_bin}'
@@ -103,11 +109,10 @@ def assemble(instruction):
     # "JMP 10"
 
 instructions = [
-    "ADDi R2 5 R0",
-    "STORE R1 R2",
-    "LOAD R3 R1",
+    "ADDi R2 1 R0",
+    "STORE R1 R1",
     "OUT R1",
-    "RESET"
+    "JMP -4"
 ]
 
 # Monta as instruções e escreve no arquivo txt
