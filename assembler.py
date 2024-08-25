@@ -1,3 +1,6 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
+
 def assemble(instruction):
 
     def to_twos_complement(value, bits):
@@ -96,34 +99,64 @@ def assemble(instruction):
         zeros = 25*'0'
         opcode_bin = '1010101'
         return f'{zeros}{opcode_bin}'
+
+    elif opcode == 'MOV':
+        func7 = '0000000'
+        regDest = format(int(parts[1][1:]), '05b')  
+        reg2 = '00000'
+        reg1 = format(int(parts[2][1:]), '05b')     
+        func3 = '000'
+        opcode_bin = '0110011'
+        return f'{func7}{reg2}{reg1}{func3}{regDest}{opcode_bin}'
     else:
         raise ValueError("Instrução desconhecida!")
 
-    # "ADDi R1 5 R1",
-    # "ADDi R1 5 R1",
-    # "ADDi R2 4 R0",
-    # "SUB R4 R5 R6",
-    # "ADDi R7 3 R8",
-    # "SUBi R9 5 R10",
-    # "STORE R11 R12 13",
-    # "JMP 10"
+def generate_code():
+    assembly_code = assembly_input.get("1.0", tk.END).strip().splitlines()
+    machine_code = []
 
-instructions = [
-    "ADDi R2 1 R0",
-    "STORE R1 R1",
-    "OUT R1",
-    "JMP -4"
-]
-
-# Monta as instruções e escreve no arquivo txt
-with open('output_instructions.txt', 'w') as f:
-    for inst in instructions:
-        binary_instruction = assemble(inst)
-        f.write(binary_instruction + '\n')
-
-    # Preenche as linhas restantes com zeros, se necessário
-    remaining_lines = 64 - len(instructions)
-    for _ in range(remaining_lines):
-        f.write('0' * 32 + '\n')
+    try:
+        for instruction in assembly_code:
+            machine_code.append(assemble(instruction))
         
-print("Instruções montadas e salvas em 'output_instructions.txt'")
+        # Preencher com linhas de zeros até 64 linhas, se necessário
+        while len(machine_code) < 64:
+            machine_code.append('0' * 32)
+        
+        machine_code_output.config(state=tk.NORMAL)
+        machine_code_output.delete("1.0", tk.END)
+        machine_code_output.insert(tk.END, "\n".join(machine_code))
+        machine_code_output.config(state=tk.DISABLED)
+    except ValueError as e:
+        messagebox.showerror("Erro", str(e))
+
+def save_file():
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+    if file_path:
+        with open(file_path, 'w') as file:
+            file.write(machine_code_output.get("1.0", tk.END).strip())
+        messagebox.showinfo("Sucesso", "Arquivo salvo com sucesso!")
+
+root = tk.Tk()
+root.title("Assembler Interface")
+
+assembly_label = tk.Label(root, text="Código Assembly:")
+assembly_label.grid(row=0, column=0, padx=10, pady=10)
+
+assembly_input = tk.Text(root, height=20, width=50)
+assembly_input.grid(row=1, column=0, padx=10, pady=10)
+
+machine_code_label = tk.Label(root, text="Código de Máquina:")
+machine_code_label.grid(row=0, column=1, padx=10, pady=10)
+
+machine_code_output = tk.Text(root, height=20, width=50)
+machine_code_output.grid(row=1, column=1, padx=10, pady=10)
+machine_code_output.config(state=tk.DISABLED)
+
+generate_button = tk.Button(root, text="Gerar Código", command=generate_code)
+generate_button.grid(row=2, column=0, padx=10, pady=10)
+
+save_button = tk.Button(root, text="Salvar Código", command=save_file)
+save_button.grid(row=2, column=1, padx=10, pady=10)
+
+root.mainloop()
